@@ -1,0 +1,65 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Book {
+  id            String     @id @default(cuid())
+  title         String
+  author        String
+  isbn          String     @unique
+  genre         String
+  publishedDate DateTime?
+  description   String?
+  status        BookStatus @default(AVAILABLE)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  checkouts     Checkout[]
+}
+
+model User {
+  id           String     @id @default(cuid())
+  name         String
+  email        String     @unique
+  phone        String?
+  address      String?
+  status       UserStatus @default(ACTIVE)
+  memberSince  DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  
+  checkouts    Checkout[]
+}
+
+model Checkout {
+  id           String    @id @default(cuid())
+  bookId       String
+  userId       String
+  checkoutDate DateTime  @default(now())
+  dueDate      DateTime
+  returnDate   DateTime?
+  condition    String?
+  notes        String?
+  
+  book         Book      @relation(fields: [bookId], references: [id])
+  user         User      @relation(fields: [userId], references: [id])
+}
+
+enum BookStatus {
+  AVAILABLE
+  CHECKED_OUT
+  ON_HOLD
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
